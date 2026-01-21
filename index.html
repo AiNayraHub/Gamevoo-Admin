@@ -1,147 +1,88 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Master Admin - Gamevoo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gamevoo - Authorizing Admin</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #0f172a; }
+        
+        .loader-ring {
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .shimmer-text {
+            background: linear-gradient(90deg, #94a3b8, #f8fafc, #94a3b8);
+            background-size: 200% 100%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .dot-pulse {
+            display: inline-block;
+            animation: pulse 1.4s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 1; }
+        }
+    </style>
 </head>
-<body class="bg-slate-950 text-slate-200 min-h-screen pb-20">
+<body class="h-screen flex items-center justify-center overflow-hidden">
 
-    <div class="max-w-6xl mx-auto p-4 md:p-8">
-        <div class="flex flex-col md:flex-row justify-between items-center mb-10 gap-4 bg-slate-900 p-6 rounded-[30px] border border-slate-800">
-            <div>
-                <h1 class="text-3xl font-black italic text-blue-500">GAMEVOO <span class="text-white">BOSS</span></h1>
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em]">Full System Access</p>
-            </div>
-            <button onclick="location.reload()" class="bg-blue-600 px-8 py-3 rounded-2xl font-bold text-xs hover:bg-blue-500 transition-all">REFRESH ALL DATA</button>
-        </div>
-
-        <div class="bg-slate-900 p-8 rounded-[40px] border border-slate-800 mb-10">
-            <h3 class="text-xl font-black mb-6 italic"><i class="fas fa-ticket-alt mr-2 text-pink-500"></i> CREATE GIFT CODE</h3>
-            <div class="flex flex-col md:flex-row gap-4">
-                <input id="new-code" type="text" placeholder="CODE2024" class="bg-slate-800 border-none p-4 rounded-2xl flex-1 outline-none focus:ring-2 focus:ring-pink-500 font-bold">
-                <input id="new-reward" type="number" placeholder="Coins (e.g. 500)" class="bg-slate-800 border-none p-4 rounded-2xl w-full md:w-48 outline-none focus:ring-2 focus:ring-pink-500 font-bold">
-                <button onclick="generateGiftCode()" class="bg-pink-600 px-10 py-4 rounded-2xl font-black text-sm">CREATE CODE</button>
+    <div class="relative flex flex-col items-center">
+        <div class="relative mb-8">
+            <div class="loader-ring"></div>
+            <div class="absolute inset-0 flex items-center justify-center">
+                <i class="fas fa-shield-alt text-indigo-500 text-2xl animate-pulse"></i>
             </div>
         </div>
 
-        <div class="bg-slate-900 rounded-[40px] border border-slate-800 mb-10 overflow-hidden">
-            <div class="p-8 border-b border-slate-800 bg-orange-500/5">
-                <h3 class="text-xl font-black italic text-orange-500"><i class="fas fa-university mr-2"></i> PENDING WITHDRAWALS</h3>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-800/50 text-[10px] font-black uppercase text-slate-500">
-                        <tr>
-                            <th class="p-6">User ID</th><th class="p-6">Amount</th><th class="p-6">UPI ID</th><th class="p-6">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody id="withdraw-table" class="text-sm">
-                        </tbody>
-                </table>
+        <div class="text-center">
+            <h1 class="text-2xl font-black italic text-white tracking-widest uppercase mb-2">
+                Gamevoo <span class="text-indigo-500">Admin</span>
+            </h1>
+            <div class="flex items-center justify-center gap-1">
+                <p class="shimmer-text text-[10px] font-bold uppercase tracking-[0.3em]">
+                    Verifying Credentials
+                </p>
+                <span class="text-white dot-pulse">.</span>
+                <span class="text-white dot-pulse" style="animation-delay: 0.2s">.</span>
+                <span class="text-white dot-pulse" style="animation-delay: 0.4s">.</span>
             </div>
         </div>
 
-        <div class="bg-slate-900 rounded-[40px] border border-slate-800 overflow-hidden">
-            <div class="p-8 border-b border-slate-800 flex justify-between items-center">
-                <h3 class="text-xl font-black italic text-blue-500"><i class="fas fa-users mr-2"></i> USER CONTROL</h3>
-                <input type="text" id="userSearch" onkeyup="searchUsers()" placeholder="Search Email..." class="bg-slate-800 p-3 rounded-xl text-xs outline-none border border-slate-700">
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-slate-800/50 text-[10px] font-black uppercase text-slate-500">
-                        <tr>
-                            <th class="p-6">Email</th><th class="p-6">Coins</th><th class="p-6">Status</th><th class="p-6 text-right">Edit</th>
-                        </tr>
-                    </thead>
-                    <tbody id="user-table" class="text-sm"></tbody>
-                </table>
-            </div>
+        <div class="absolute bottom-[-100px] flex items-center gap-2 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl backdrop-blur-md">
+            <i class="fas fa-lock text-emerald-500 text-[10px]"></i>
+            <span class="text-slate-400 text-[9px] font-black uppercase tracking-widest">Secure Admin Access</span>
         </div>
     </div>
 
-    <script src="app.js"></script>
     <script>
-        // 1. Generate Gift Code
-        async function generateGiftCode() {
-            const code = document.getElementById('new-code').value.toUpperCase();
-            const reward = document.getElementById('new-reward').value;
-            if(!code || !reward) return alert("Fill details");
-
-            const { error } = await supabaseClient.from('gift_codes').insert([{ code, reward: parseInt(reward) }]);
-            if(!error) {
-                alert("Gift Code Created: " + code);
-                document.getElementById('new-code').value = '';
-                document.getElementById('new-reward').value = '';
-            } else { alert("Error: " + error.message); }
-        }
-
-        // 2. Fetch Withdrawals
-        async function loadWithdrawals() {
-            const { data, error } = await supabaseClient.from('withdrawals').select('*').eq('status', 'pending');
-            const tbody = document.getElementById('withdraw-table');
-            tbody.innerHTML = '';
-            data.forEach(req => {
-                tbody.innerHTML += `
-                <tr class="border-t border-slate-800 hover:bg-slate-800/50">
-                    <td class="p-6 text-xs text-slate-400">${req.user_id}</td>
-                    <td class="p-6 font-black text-orange-500">₹${req.amount/100}</td>
-                    <td class="p-6 font-bold text-white">${req.upi_id}</td>
-                    <td class="p-6">
-                        <button onclick="updateWithdraw('${req.id}', 'success')" class="bg-green-600/20 text-green-500 px-4 py-2 rounded-xl font-bold text-[10px] mr-2">APPROVE</button>
-                        <button onclick="updateWithdraw('${req.id}', 'rejected')" class="bg-red-600/20 text-red-500 px-4 py-2 rounded-xl font-bold text-[10px]">REJECT</button>
-                    </td>
-                </tr>`;
-            });
-        }
-
-        async function updateWithdraw(id, status) {
-            await supabaseClient.from('withdrawals').update({ status }).eq('id', id);
-            loadWithdrawals();
-        }
-
-        // 3. Load Users
-        async function loadUsers() {
-            const { data } = await supabaseClient.from('profiles').select('*').order('coins', {ascending: false});
-            const tbody = document.getElementById('user-table');
-            tbody.innerHTML = '';
-            data.forEach(user => {
-                tbody.innerHTML += `
-                <tr class="border-t border-slate-800 hover:bg-slate-800/40">
-                    <td class="p-6 font-bold">${user.email}</td>
-                    <td class="p-6 text-blue-400 font-black">🪙 ${user.coins}</td>
-                    <td class="p-6"><span class="px-3 py-1 rounded-full text-[9px] font-black ${user.status==='blocked'?'bg-red-500 text-white':'bg-green-500/10 text-green-500'}">${user.status||'active'}</span></td>
-                    <td class="p-6 text-right flex justify-end gap-2">
-                        <button onclick="adjustAdminCoins('${user.id}', ${user.coins}, 1000)" class="bg-blue-600/10 text-blue-500 p-2 rounded-lg font-bold text-[10px]">+1K</button>
-                        <button onclick="blockUser('${user.id}', '${user.status}')" class="bg-red-500/10 text-red-500 p-2 rounded-lg font-bold text-[10px] uppercase">${user.status==='blocked'?'Unblock':'Block'}</button>
-                    </td>
-                </tr>`;
-            });
-        }
-
-        async function adjustAdminCoins(uid, current, add) {
-            await supabaseClient.from('profiles').update({ coins: current + add }).eq('id', uid);
-            loadUsers();
-        }
-
-        async function blockUser(uid, status) {
-            const newStatus = status === 'blocked' ? 'active' : 'blocked';
-            await supabaseClient.from('profiles').update({ status: newStatus }).eq('id', uid);
-            loadUsers();
-        }
-
-        function searchUsers() {
-            let input = document.getElementById('userSearch').value.toLowerCase();
-            let rows = document.getElementById('user-table').getElementsByTagName('tr');
-            for (let i = 0; i < rows.length; i++) {
-                let email = rows[i].getElementsByTagName('td')[0].innerText.toLowerCase();
-                rows[i].style.display = email.includes(input) ? "" : "none";
-            }
-        }
-
-        window.onload = () => { loadWithdrawals(); loadUsers(); };
+        // Redirect Logic
+        setTimeout(() => {
+            // Aapka admin panel ka file name yahan check karein
+            window.location.href = 'admin.html';
+        }, 3000); // 3 seconds ka wait
     </script>
 </body>
 </html>
